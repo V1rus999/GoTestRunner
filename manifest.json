@@ -1,0 +1,18 @@
+{
+    "manifest_version": 2,
+    "name": "Testington von Testworthy",
+    "version": "0.2",
+    "description": "Run tests for you my overlord.",
+    "browser_action": {
+        "default_icon": {
+            "32": "icons/troll_ic.png"
+        },
+        "default_title": "Testington von Testworthy"
+    },
+    "content_scripts": [
+        {
+          "matches": ["*://ci.jemstep.com/*"],
+          "js": ["testBot.js"]
+        }
+      ]
+}
