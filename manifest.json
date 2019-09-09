@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Testington von Testworthy",
-    "version": "0.3",
+    "version": "0.4",
     "description": "Run tests for you my overlord.",
     "browser_action": {
         "default_icon": {
@@ -10,7 +10,14 @@
         "default_title": "Testington von Testworthy",
         "default_popup": "popup/testington_popup.html"
     },
-    "permissions": [
-      "activeTab"
-    ]
+    "background": {
+        "scripts": ["bg_scripts/testington_bg.js"]
+      },
+      "content_scripts": [
+        {
+            "matches": ["*://ci.jemstep.com/*"],
+          "js": ["content_scripts/testBot.js"]
+        }
+      ],
+    "permissions": ["<all_urls>", "activeTab"]
 }
