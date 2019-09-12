@@ -1,9 +1,8 @@
 const runningList = new Set();
 
 function receivedMessage(content, sender, respond) {
-  console.log(runningList);
-  console.log(content);
   if (content.message == "START_AUTORUN") {
+    console.log("Starting");
     runningList.add(content.uniqueName);
     respond({
       message: content.message,
@@ -11,7 +10,6 @@ function receivedMessage(content, sender, respond) {
     });
   } else if (content.message == "STOP_AUTORUN") {
     console.log("Stopping");
-    console.log("Found element to delete:",runningList.delete(content.uniqueName));
     respond({
       message: content.message,
       result: "OK"

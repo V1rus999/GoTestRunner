@@ -101,11 +101,11 @@
         const actualCheckBox = selectorClass.children.item(0);
         if (!actualCheckBox.checked) {
           actualCheckBox.click();
-          clickedOnSomething = true;
           console.log("Clicked on a failed checkbox");
         } else {
           console.log("Failed checkbox already clicked on");
         }
+        clickedOnSomething = true;
       }
     }
     return clickedOnSomething;
