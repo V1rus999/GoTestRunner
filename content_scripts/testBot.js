@@ -16,49 +16,52 @@
   var runningReference = null;
   var mutationObserver = null;
 
-  const uniqueName = extractBuildUniqueName();
-  sendMessage(queryAutorunningMessage(uniqueName), browser).then(res => {
-    console.log(res);
-    const shouldRun = res == "true";
-    main(shouldRun);
-  });
+  const jobName = extractBuildUniqueName();
+  const shouldCurrentlyBeRunning = async () =>
+    (await sendMessage(queryAutorunningMessage(jobName), browser)).result ===
+    "true";
 
-  function main(isCurrentlyRunning) {
-    console.log(`Main is running ${isCurrentlyRunning}`);
-    const buttonText = isCurrentlyRunning
-      ? "Stop Autorun AT"
-      : "Start Autorun AT";
+  main();
+
+  async function main() {
+    const shouldBeRunning = await shouldCurrentlyBeRunning();
+    console.log(`Started main. Is currently running ${shouldBeRunning}`);
+    if (shouldBeRunning) {
+      setupAutoTestRuns();
+    } else {
+      clearInterval(runningReference);
+      runningReference = null;
+    }
+
+    const buttonText = shouldBeRunning ? "Stop Autorun AT" : "Start Autorun AT";
 
     if (!checkAutorunButtonVisible()) {
       console.log("Button is not visible");
-      const eventListener = () => {
-        console.log(`Eventlistener ran ${isCurrentlyRunning}`);
-          if (!isCurrentlyRunning) {
-            setupAutoTestRuns();
-          } else {
-            sendMessage(stopAutorunMessage(uniqueName), browser);
-            clearInterval(runningReference);
-          }
+      const eventListener = async () => {
+        const eventScopedShouldBeRunning = await shouldCurrentlyBeRunning();
+        console.log(
+          `Eventlistener shouldCurrentlyBeRunning ${eventScopedShouldBeRunning}`
+        );
+        if (!eventScopedShouldBeRunning) {
+          sendMessage(startAutorunMessage(jobName), browser).then(main());
+        } else {
+          sendMessage(stopAutorunMessage(jobName), browser).then(main());
+        }
       };
 
       addAutoRunButton(buttonText, eventListener);
     } else {
-      console.log("Button is visible");
       changeAutoRunButtonText(buttonText);
-    }
-
-    if (isCurrentlyRunning && !runningReference) {
-      setupAutoTestRuns();
     }
   }
 
   function setupAutoTestRuns() {
-    sendMessage(startAutorunMessage(uniqueName), browser);
-    clearInterval(runningReference);
-    //Lets run it as you click
-    startTestRuns();
-    //Then run it every 30 seconds
-    runningReference = setInterval(startTestRuns, 30000);
+    if (!runningReference) {
+      //Lets run it as you click
+      startTestRuns();
+      //Then run it every 30 seconds
+      runningReference = setInterval(startTestRuns, 30000);
+    }
   }
 
   function startTestRuns() {
@@ -87,7 +90,7 @@
       );
     const bodyWithJobs = tableWithJobs.item(0).firstElementChild;
     const jobs = bodyWithJobs.children;
-    const clickedOnSomething = false;
+    var clickedOnSomething = false;
 
     // i = 1 because we want to skip the table header
     for (var i = 1, row; (row = jobs.item(i)); i++) {
@@ -128,7 +131,7 @@
 
   function changeAutoRunButtonText(text) {
     const button = document.getElementById("autoRunAtButton");
-    if (button.length > 0) {
+    if (button) {
       button.innerHTML = text;
     }
   }
@@ -170,7 +173,6 @@
   function checkAutorunButtonVisible() {
     return document.getElementById("autoRunAtButton") != null;
   }
-  
 
   function stopAutorunMessage(name) {
     return {
