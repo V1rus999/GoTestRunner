@@ -71,7 +71,7 @@
     const rerunButton = rerunHolder.children.item(0);
     if (rerunButton && rerunButton.className.includes("submit")) {
       if (selectCheckboxes()) {
-        // rerunButton.click();
+        rerunButton.click();
         console.log("Clicked on submit");
       } else {
         console.log("Nothing to run");
