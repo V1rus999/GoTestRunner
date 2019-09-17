@@ -158,8 +158,12 @@
       if (!mutationObserver) {
         const whatToTarget = document.getElementsByTagName("body")[0];
         console.log("Adding mutation observer");
-        mutationObserver = new MutationObserver(e => {
-          if (e[0].removedNodes) addAutoRunButton(text, eventListener);
+        mutationObserver = new MutationObserver(async e => {
+          const eventScopedShouldBeRunning = await shouldCurrentlyBeRunning();
+          const buttonText = eventScopedShouldBeRunning
+            ? "Stop Autorun AT"
+            : "Start Autorun AT";
+          if (e[0].removedNodes) addAutoRunButton(buttonText, eventListener);
         });
         mutationObserver.observe(whatToTarget, {
           attributes: true,
